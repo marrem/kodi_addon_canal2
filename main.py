@@ -104,7 +104,7 @@ def list_categories():
         # http://mirrors.xbmc.org/docs/python-docs/15.x-isengard/xbmcgui.html#ListItem-setInfo
         list_item.setInfo('video', {'title': category, 'genre': category})
         # Create a URL for a plugin recursive call.
-        # Example: plugin://plugin.video.example/?action=listing&category=Animals
+        # Example: plugin://plugin.video.canal2/?action=listing&category=Animals
         url = get_url(action='listing', category=category)
         # is_folder = True means that this item opens a sub-list of lower level items.
         is_folder = True
@@ -146,7 +146,7 @@ def list_videos(category):
         # This is mandatory for playable items!
         list_item.setProperty('IsPlayable', 'true')
         # Create a URL for a plugin recursive call.
-        # Example: plugin://plugin.video.example/?action=play&video=http://www.vidsplay.com/vids/crab.mp4
+        # Example: plugin://plugin.video.canal2/?action=play&video=http://www.vidsplay.com/vids/crab.mp4
         video_url = get_video_stream_url(video['videopage'])
         url = get_url(action='play', video=video_url)
         # Add the list item to a virtual Kodi folder.
