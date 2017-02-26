@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.example"
 version="2.1.0"
-name="Example Kodi Video Plugin"
-provider-name="Roman_V_M">
+name="Canal2 Video Plugin"
+provider-name="Marc Remijn">
 <requires>
   <import addon="xbmc.python" version="2.24.0"/>
+  <import addon="script.module.beautifulsoup" version="3.2.1"/>
 </requires>
 <extension point="xbmc.python.pluginsource" library="main.py">
   <provides>video</provides>
 </extension>
 <extension point="xbmc.addon.metadata">
-  <summary lang="en">Example Kodi Video Plugin</summary>
-  <description lang="en">An example video plugin for Kodi mediacenter.</description>
-  <disclaimer lang="en">Free sample videos are provided by www.vidsplay.com.</disclaimer>
+  <summary lang="en">Video Plugin to watch Canal2</summary>
+  <description lang="en">Watch Cameroon TV channel Canal2</description>
+  <description lang="fr">Regardez la chaine telé Camerounais Canal2</description>
   <assets>
     <icon>icon.png</icon>
     <fanart>fanart.jpg</fanart>

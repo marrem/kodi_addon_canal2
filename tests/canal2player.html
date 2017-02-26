@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Canal2 Player</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script type="text/javascript" src="js/clappr.js"></script>
+  <style>
+    body
+    {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      position: absolute;
+      margin: 0px;
+      padding: 0px;
+      border: 0px none;
+      font-size: 100%;
+      text-align: start;
+    }
+    div#all
+    {
+      height: 100%;
+    }
+  </style>
+</head>
+<body><div id="all"></div><script>
+  var hasFlashval;
+  var player;
+  var timer = null;
+  var resizetimer = null;
+  var format = "hls";
+  var is_playing = false;
+  var source = "primary";
+  var hasflashls;
+  var hashlsjs;
+  var hashtml5;
+  var hasflashplayer;
+  function hasFlash()
+  {
+    try
+    {
+      var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+      return !!fo;
+    }
+    catch (e)
+    {
+      return !!(navigator.mimeTypes && navigator.mimeTypes['application/x-shockwave-flash'] !== undefined && navigator.mimeTypes['application/x-shockwave-flash'].enabledPlugin);
+    }
+  };
+  function player_hls(url)
+  {
+    player = new Clappr.Player({
+      source: url,
+      events:
+      {
+        onPlay: function()
+        {
+        },
+        onPause: function()
+        {
+        },
+        onStop: function()
+        {
+        },
+        onError: function()
+        {
+          var url = "log/log.php?type=onerrorhls&hasflashval="+hasFlashval+"&hasflashls="+hasflashls+"&hashlsjs="+hashlsjs+"&hashtml5="+hashtml5+"&hasflashplayer="+hasflashplayer+"&source="+source+"&format="+format+"&first_cdn_server=todo";
+          url=url+"&sid="+Math.random();
+          xmlHttp = new XMLHttpRequest();
+          xmlHttp.open( "GET", url, true );
+          xmlHttp.send( null );
+          if(source == "primary")
+          {
+            source = "backup";
+            player.destroy();
+            player_hls("http://canal2-live-p2-cdn.hexaglobe.net/46b20a25cbd94f12fe77d8c1f1c3d836/58b2e0aa/canal2intepri_fre.smil/playlist.m3u8");
+          }
+        }
+      },
+      autoPlay: true,
+      width: "100%",
+      height: "100%",
+      parentId: "#all"
+    });
+  }
+  hasFlashval = hasFlash();
+  hasflashls = Clappr.FlasHLS.canPlay("http://canal2-live-p2-cdn.hexaglobe.net/46b20a25cbd94f12fe77d8c1f1c3d836/58b2e0aa/canal2intepri_fre.smil/playlist.m3u8");
+  hashlsjs = Clappr.HLS.canPlay("http://canal2-live-p2-cdn.hexaglobe.net/46b20a25cbd94f12fe77d8c1f1c3d836/58b2e0aa/canal2intepri_fre.smil/playlist.m3u8");
+  hashtml5 = Clappr.HTML5Video.canPlay("http://canal2-live-p2-cdn.hexaglobe.net/46b20a25cbd94f12fe77d8c1f1c3d836/58b2e0aa/canal2intepri_fre.smil/playlist.m3u8");
+  hasflashplayer = Clappr.Flash.canPlay("http://canal2-live-p2-cdn.hexaglobe.net/46b20a25cbd94f12fe77d8c1f1c3d836/58b2e0aa/canal2intepri_fre.smil/playlist.m3u8");
+  if(hasFlashval || hashlsjs || hashtml5 || hasflashls || hasflashplayer)
+  {
+    player_hls("http://canal2-live-p2-cdn.hexaglobe.net/46b20a25cbd94f12fe77d8c1f1c3d836/58b2e0aa/canal2intepri_fre.smil/playlist.m3u8");
+  }
+  else
+  {
+    var url = "log/log.php?type=noplayerfound&hasflashval="+hasFlashval+"&hasflashls="+hasflashls+"&hashlsjs="+hashlsjs+"&hashtml5="+hashtml5+"&hasflashplayer="+hasflashplayer+"&source="+source+"&format="+format;
+    url=url+"&sid="+Math.random();
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", url, true );
+    xmlHttp.send( null );
+    document.getElementById("all").innerHTML =
+      "<p><h2>Pour acceder au flux live depuis un PC<br>"+
+      "le plugin flash est obligatoire:<br><a href=\"https://get.adobe.com/flashplayer/\">"+
+      "<img src=\"img/GetAdobeFlashPlayer_icon.png\"></a></h2></p>";
+  }
+</script></body>
+</html>

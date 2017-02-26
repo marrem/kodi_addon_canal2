@@ -9,6 +9,9 @@ from urllib import urlencode
 from urlparse import parse_qsl
 import xbmcgui
 import xbmcplugin
+from contextlib import closing
+from urllib2 import urlopen
+from StreamUrlExtractor import StreamUrlExtractor
 
 # Get the plugin url in plugin:// notation.
 _url = sys.argv[0]
@@ -19,44 +22,15 @@ _handle = int(sys.argv[1])
 # Here we use a fixed set of properties simply for demonstrating purposes
 # In a "real life" plugin you will need to get info and links to video files/streams
 # from some web-site or online service.
-VIDEOS = {'Animals': [{'name': 'Crab',
-                       'thumb': 'http://www.vidsplay.com/vids/crab.jpg',
-                       'video': 'http://www.vidsplay.com/vids/crab.mp4',
-                       'genre': 'Animals'},
-                      {'name': 'Alligator',
-                       'thumb': 'http://www.vidsplay.com/vids/alligator.jpg',
-                       'video': 'http://www.vidsplay.com/vids/alligator.mp4',
-                       'genre': 'Animals'},
-                      {'name': 'Turtle',
-                       'thumb': 'http://www.vidsplay.com/vids/turtle.jpg',
-                       'video': 'http://www.vidsplay.com/vids/turtle.mp4',
-                       'genre': 'Animals'}
+VIDEOS = {'Live': [{'name': 'Canal2',
+                       'thumb': 'http://www.canal2international.net/images/logo.png',
+                       'videopage': 'http://www.canal2international.net/live.php',
+                       'genre': 'Mixed'},
                       ],
-            'Cars': [{'name': 'Postal Truck',
+            'Replay': [{'name': 'Postal Truck',
                       'thumb': 'http://www.vidsplay.com/vids/us_postal.jpg',
-                      'video': 'http://www.vidsplay.com/vids/us_postal.mp4',
-                      'genre': 'Cars'},
-                     {'name': 'Traffic',
-                      'thumb': 'http://www.vidsplay.com/vids/traffic1.jpg',
-                      'video': 'http://www.vidsplay.com/vids/traffic1.avi',
-                      'genre': 'Cars'},
-                     {'name': 'Traffic Arrows',
-                      'thumb': 'http://www.vidsplay.com/vids/traffic_arrows.jpg',
-                      'video': 'http://www.vidsplay.com/vids/traffic_arrows.mp4',
+                      'videopage': 'http://www.vidsplay.com/vids/us_postal.mp4',
                       'genre': 'Cars'}
-                     ],
-            'Food': [{'name': 'Chicken',
-                      'thumb': 'http://www.vidsplay.com/vids/chicken.jpg',
-                      'video': 'http://www.vidsplay.com/vids/bbqchicken.mp4',
-                      'genre': 'Food'},
-                     {'name': 'Hamburger',
-                      'thumb': 'http://www.vidsplay.com/vids/hamburger.jpg',
-                      'video': 'http://www.vidsplay.com/vids/hamburger.mp4',
-                      'genre': 'Food'},
-                     {'name': 'Pizza',
-                      'thumb': 'http://www.vidsplay.com/vids/pizza.jpg',
-                      'video': 'http://www.vidsplay.com/vids/pizza.mp4',
-                      'genre': 'Food'}
                      ]}
 
 
@@ -142,6 +116,13 @@ def list_categories():
     xbmcplugin.endOfDirectory(_handle)
 
 
+def get_video_stream_url(videopage_url):
+    main_page = urlopen(videopage_url)
+    parser = StreamUrlExtractor()
+    player_page_url = parser.parse_player_url(main_page)
+    player_page = urlopen(player_page_url)
+    return parser.parse_stream_url(player_page)
+
 def list_videos(category):
     """
     Create the list of playable videos in the Kodi interface.
@@ -166,7 +147,8 @@ def list_videos(category):
         list_item.setProperty('IsPlayable', 'true')
         # Create a URL for a plugin recursive call.
         # Example: plugin://plugin.video.example/?action=play&video=http://www.vidsplay.com/vids/crab.mp4
-        url = get_url(action='play', video=video['video'])
+        video_url = get_video_stream_url(video['videopage'])
+        url = get_url(action='play', video=video_url)
         # Add the list item to a virtual Kodi folder.
         # is_folder = False means that this item won't open any sub-list.
         is_folder = False
