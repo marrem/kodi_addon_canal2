@@ -196,6 +196,8 @@ def router(paramstring):
     # Parse a URL-encoded paramstring to the dictionary of
     # {<parameter>: <value>} elements
     params = dict(parse_qsl(paramstring))
+    // TODO: join(params) werkt niet. Zoeken hoe we wat uit dict() komt kunnen stringifyen.
+    xbmc.log('[plugin.video.canal2] - router called with params ' + ';'.join(params))
     # Check the parameters passed to the plugin
     if params:
         if params['action'] == 'listing':
