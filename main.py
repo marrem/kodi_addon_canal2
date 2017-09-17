@@ -27,12 +27,15 @@ VIDEOS = {'Live': [{'name': 'Canal2',
                        'thumb': 'http://www.canal2international.net/images/logo.png',
                        'videopage': 'http://www.canal2international.net/live.php',
                        'genre': 'Mixed'},
-                      ],
-            'Replay': [{'name': 'Postal Truck',
-                      'thumb': 'http://www.vidsplay.com/vids/us_postal.jpg',
-                      'videopage': 'http://www.vidsplay.com/vids/us_postal.mp4',
-                      'genre': 'Cars'}
-                     ]}
+                      ]
+          }
+
+            # 'Replay': [{'name': 'Postal Truck',
+            #           'thumb': 'http://www.vidsplay.com/vids/us_postal.jpg',
+            #           'videopage': 'http://www.vidsplay.com/vids/us_postal.mp4',
+            #           'genre': 'Cars'}
+            #          ]}
+
 
 
 def build_url(**kwargs):
@@ -125,6 +128,7 @@ def add_category_list_item(category):
 
 
 def get_video_stream_url(videopage_url):
+    xbmc.log("get_video_stream called with arguments: '" + videopage_url + "'")
     main_page = urlopen(videopage_url)
     parser = StreamUrlExtractor()
     player_page_url = parser.parse_player_url(main_page)
@@ -196,8 +200,7 @@ def router(paramstring):
     # Parse a URL-encoded paramstring to the dictionary of
     # {<parameter>: <value>} elements
     params = dict(parse_qsl(paramstring))
-    // TODO: join(params) werkt niet. Zoeken hoe we wat uit dict() komt kunnen stringifyen.
-    xbmc.log('[plugin.video.canal2] - router called with params ' + ';'.join(params))
+    xbmc.log('[plugin.video.canal2] - router called with params ' + paramstring)
     # Check the parameters passed to the plugin
     if params:
         if params['action'] == 'listing':
@@ -220,6 +223,6 @@ def router(paramstring):
 if __name__ == '__main__':
     # Call the router function and pass the plugin call parameters to it.
     # We use string slicing to trim the leading '?' from the plugin call paramstring
-    xbmc.log('[plugin.video.canal2] Plugin started', level=xbmc.LOGINFO)
-    xbmc.log('[plugin.video.canal2] Arguments: ' + ';'.join(sys.argv), level=xbmc.LOGDEBUG)
+    xbmc.log('[plugin.video.canal2] Plugin called', level=xbmc.LOGDEBUG)
+    xbmc.log('[plugin.video.canal2] With arguments: ' + ';'.join(sys.argv), level=xbmc.LOGDEBUG)
     router(sys.argv[2][1:])
