@@ -5,11 +5,13 @@
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
 import sys
+import os
 from urllib import urlencode
 from urlparse import parse_qsl
 import xbmc
 import xbmcgui
 import xbmcplugin
+import xbmcaddon
 from contextlib import closing
 from urllib2 import urlopen
 from StreamUrlExtractor import StreamUrlExtractor
@@ -19,13 +21,15 @@ _url = sys.argv[0]
 # Get the plugin handle as an integer number.
 _handle = int(sys.argv[1])
 
+
+_resources_path = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resources');
 # Free sample videos are provided by www.vidsplay.com
 # Here we use a fixed set of properties simply for demonstrating purposes
 # In a "real life" plugin you will need to get info and links to video files/streams
 # from some web-site or online service.
 VIDEOS = {'Live': [{'name': 'Canal2',
                        # 'thumb': 'http://www.canal2international.net/images/logo.png',
-                       'thumb': 'file:canal2logo.png',
+                       'thumb': os.path.join(_resources_path ,'canal2logo.png'),
                        'videopage': 'http://www.canal2international.net/live.php',
                        'genre': 'Mixed'},
                       ]
@@ -110,9 +114,12 @@ def add_category_list_item(category):
     # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
     # Here we use the same image for all items for simplicity's sake.
     # In a real-life plugin you need to set each image accordingly.
+    # Hier komen categorie plaatjes uit het eerste item in de categorie.
+    # Wellicht aparte plaatjes voor categorie als we meer categorien hebben.
     list_item.setArt({'thumb': VIDEOS[category][0]['thumb'],
                       'icon': VIDEOS[category][0]['thumb'],
-                      'fanart': VIDEOS[category][0]['thumb']})
+                      'fanart': VIDEOS[category][0]['thumb'],
+                      'banner': VIDEOS[category][0]['thumb']})
     # Set additional info for the list item.
     # Here we use a category name for both properties for for simplicity's sake.
     # setInfo allows to set various information for an item.
@@ -162,7 +169,7 @@ def add_video_list_item(video):
     # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
     # Here we use the same image for all items for simplicity's sake.
     # In a real-life plugin you need to set each image accordingly.
-    list_item.setArt({'thumb': video['thumb'], 'icon': video['thumb'], 'fanart': video['thumb']})
+    list_item.setArt({'thumb': video['thumb'], 'icon': video['thumb'], 'fanart': video['thumb'], 'banner': video['thumb']})
     # Set 'IsPlayable' property to 'true'.
     # This is mandatory for playable items!
     list_item.setProperty('IsPlayable', 'true')
@@ -188,6 +195,9 @@ def play_video(path):
     play_item = xbmcgui.ListItem(path=path)
     # Pass the item to the Kodi player.
     xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
+    # TODO: aspect ratio voor livestream klopt niet. Kunnen we player view mode
+    # 16:9 stretch forceren?
+
 
 
 def router(paramstring):
