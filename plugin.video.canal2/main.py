@@ -24,7 +24,8 @@ _handle = int(sys.argv[1])
 # In a "real life" plugin you will need to get info and links to video files/streams
 # from some web-site or online service.
 VIDEOS = {'Live': [{'name': 'Canal2',
-                       'thumb': 'http://www.canal2international.net/images/logo.png',
+                       # 'thumb': 'http://www.canal2international.net/images/logo.png',
+                       'thumb': 'file:canal2logo.png',
                        'videopage': 'http://www.canal2international.net/live.php',
                        'genre': 'Mixed'},
                       ]
