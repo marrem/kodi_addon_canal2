@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.canal2"
-version="2.1.0"
+version="1.0"
 name="Canal2 Video Plugin"
 provider-name="Marc Remijn">
 <requires>
