@@ -174,7 +174,7 @@ def add_video_list_item(video):
     # This is mandatory for playable items!
     list_item.setProperty('IsPlayable', 'true')
     # Create a URL for a plugin recursive call.
-    # Example: plugin://plugin.video.canal2/?action=play&video=http://www.vidsplay.com/vids/crab.mp4
+    # Example: plugin://plugin.video.canal2/?action=play&video=http://canal2-live-b2-cdn.hexaglobe.net/c9391...
     video_url = get_video_stream_url(video['videopage'])
     url = build_url(action='play', video=video_url)
     # Add the list item to a virtual Kodi folder.
