@@ -4,17 +4,16 @@
 # Created on: 28.11.2014
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
-import sys
 import os
+import sys
 from urllib import urlencode
 from urlparse import parse_qsl
+
 import xbmc
+import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import xbmcaddon
-from contextlib import closing
-from urllib2 import urlopen
-from StreamUrlExtractor import StreamUrlExtractor
+import stream_url_extractor
 
 # Get the plugin url in plugin:// notation.
 _url = sys.argv[0]
@@ -30,17 +29,17 @@ _resources_path = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resource
 VIDEOS = {'Live': [{'name': 'Canal2',
                        # 'thumb': 'http://www.canal2international.net/images/logo.png',
                        'thumb': os.path.join(_resources_path ,'canal2logo.png'),
-                       'videopage': 'http://www.canal2international.net/live.php',
+                       'channel': stream_url_extractor.LIVE,
                        'genre': 'Mixed'},
                       ]
           }
+
 
             # 'Replay': [{'name': 'Postal Truck',
             #           'thumb': 'http://www.vidsplay.com/vids/us_postal.jpg',
             #           'videopage': 'http://www.vidsplay.com/vids/us_postal.mp4',
             #           'genre': 'Cars'}
             #          ]}
-
 
 
 def build_url(**kwargs):
@@ -135,14 +134,6 @@ def add_category_list_item(category):
     xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
 
 
-def get_video_stream_url(videopage_url):
-    xbmc.log("get_video_stream called with arguments: '" + videopage_url + "'")
-    main_page = urlopen(videopage_url)
-    parser = StreamUrlExtractor()
-    player_page_url = parser.parse_player_url(main_page)
-    player_page = urlopen(player_page_url)
-    return parser.parse_stream_url(player_page)
-
 def list_videos(category):
     """
     Create the list of playable videos in the Kodi interface.
@@ -175,8 +166,7 @@ def add_video_list_item(video):
     list_item.setProperty('IsPlayable', 'true')
     # Create a URL for a plugin recursive call.
     # Example: plugin://plugin.video.canal2/?action=play&video=http://canal2-live-b2-cdn.hexaglobe.net/c9391...
-    video_url = get_video_stream_url(video['videopage'])
-    url = build_url(action='play', video=video_url)
+    url = build_url(action='play', channel=video['channel'])
     # Add the list item to a virtual Kodi folder.
     # is_folder = False means that this item won't open any sub-list.
     is_folder = False
@@ -184,15 +174,16 @@ def add_video_list_item(video):
     xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
 
 
-def play_video(path):
+def play_video(channel):
     """
     Play a video by the provided path.
 
-    :param path: Fully-qualified video URL
+    :param channel: Canal2 channel: int
     :type path: str
     """
+    url = stream_url_extractor.get_video_stream_url(channel)
     # Create a playable item with a path to play.
-    play_item = xbmcgui.ListItem(path=path)
+    play_item = xbmcgui.ListItem(path=url)
     # Pass the item to the Kodi player.
     xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
     # TODO: aspect ratio voor livestream klopt niet. Kunnen we player view mode
@@ -218,8 +209,8 @@ def router(paramstring):
             # Display the list of videos in a provided category.
             list_videos(params['category'])
         elif params['action'] == 'play':
-            # Play a video from a provided URL.
-            play_video(params['video'])
+            # Play a video for provided channel. Url will be looked up before play
+            play_video(params['channel'])
         else:
             # If the provided paramstring does not contain a supported action
             # we raise an exception. This helps to catch coding errors,
