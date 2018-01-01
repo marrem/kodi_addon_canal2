@@ -13,7 +13,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import stream_url_extractor
+from canal2 import stream_url_extractor
 
 # Get the plugin url in plugin:// notation.
 _url = sys.argv[0]
@@ -28,6 +28,7 @@ _resources_path = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resource
 # from some web-site or online service.
 VIDEOS = {'Live': [{'name': 'Canal2',
                        # 'thumb': 'http://www.canal2international.net/images/logo.png',
+                       'icon': os.path.join(_resources_path ,'canal2logo_white_background.png'),
                        'thumb': os.path.join(_resources_path ,'canal2logo.png'),
                        'channel': stream_url_extractor.LIVE,
                        'genre': 'Mixed'},
@@ -116,7 +117,7 @@ def add_category_list_item(category):
     # Hier komen categorie plaatjes uit het eerste item in de categorie.
     # Wellicht aparte plaatjes voor categorie als we meer categorien hebben.
     list_item.setArt({'thumb': VIDEOS[category][0]['thumb'],
-                      'icon': VIDEOS[category][0]['thumb'],
+                      'icon': VIDEOS[category][0]['icon'],
                       'fanart': VIDEOS[category][0]['thumb'],
                       'banner': VIDEOS[category][0]['thumb']})
     # Set additional info for the list item.
@@ -160,7 +161,7 @@ def add_video_list_item(video):
     # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
     # Here we use the same image for all items for simplicity's sake.
     # In a real-life plugin you need to set each image accordingly.
-    list_item.setArt({'thumb': video['thumb'], 'icon': video['thumb'], 'fanart': video['thumb'], 'banner': video['thumb']})
+    list_item.setArt({'thumb': video['icon'], 'icon': video['icon'], 'fanart': video['thumb'], 'banner': video['thumb']})
     # Set 'IsPlayable' property to 'true'.
     # This is mandatory for playable items!
     list_item.setProperty('IsPlayable', 'true')
@@ -176,12 +177,16 @@ def add_video_list_item(video):
 
 def play_video(channel):
     """
-    Play a video by the provided path.
+    Play a video by the provided channel.
+    Channel is resolved to a url before play
+    Available channels in 
 
     :param channel: Canal2 channel: int
     :type path: str
     """
+    xbmc.log("play_video called with channel: " + str(channel), level=xbmc.LOGDEBUG)
     url = stream_url_extractor.get_video_stream_url(channel)
+    xbmc.log("channel resolved to play url: " + url, level=xbmc.LOGDEBUG)
     # Create a playable item with a path to play.
     play_item = xbmcgui.ListItem(path=url)
     # Pass the item to the Kodi player.
@@ -210,7 +215,7 @@ def router(paramstring):
             list_videos(params['category'])
         elif params['action'] == 'play':
             # Play a video for provided channel. Url will be looked up before play
-            play_video(params['channel'])
+            play_video(int(params['channel']))
         else:
             # If the provided paramstring does not contain a supported action
             # we raise an exception. This helps to catch coding errors,

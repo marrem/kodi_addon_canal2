@@ -16,8 +16,13 @@ LIVE_PAGE = 'http://www.canal2international.net/live.php'
 
 
 def get_video_stream_url(channel):
+    xbmc.log("get_video_stream called with channel: " + str(channel), level=xbmc.LOGDEBUG)
     if (channel == LIVE):
-        get_video_stream_url_live()
+        return get_video_stream_url_live()
+    else:
+        message = "Channel '" + channel + "' not found"
+        xbmc.log(message)
+        raise Exception(message)
 
 
 def get_video_stream_url_live():
@@ -28,7 +33,7 @@ def get_video_stream_url_live():
     return parse_stream_url(player_page)
 
 
-def parse_stream_url(self, html):
+def parse_stream_url(html):
     """
     Obtain m3u url from player page
     :param html player page:
@@ -41,7 +46,7 @@ def parse_stream_url(self, html):
     return stream_url
 
 
-def parse_player_url(self, html):
+def parse_player_url(html):
     """
     Obtain player iframe html page url from main live.php page
     :param html main page:
