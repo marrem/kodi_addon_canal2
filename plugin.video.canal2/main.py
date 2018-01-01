@@ -4,17 +4,16 @@
 # Created on: 28.11.2014
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
-import sys
 import os
+import sys
 from urllib import urlencode
 from urlparse import parse_qsl
+
 import xbmc
+import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import xbmcaddon
-from contextlib import closing
-from urllib2 import urlopen
-from StreamUrlExtractor import StreamUrlExtractor
+from canal2 import stream_url_extractor
 
 # Get the plugin url in plugin:// notation.
 _url = sys.argv[0]
@@ -29,18 +28,19 @@ _resources_path = os.path.join(xbmcaddon.Addon().getAddonInfo('path'), 'resource
 # from some web-site or online service.
 VIDEOS = {'Live': [{'name': 'Canal2',
                        # 'thumb': 'http://www.canal2international.net/images/logo.png',
+                       'icon': os.path.join(_resources_path ,'canal2logo_white_background.png'),
                        'thumb': os.path.join(_resources_path ,'canal2logo.png'),
-                       'videopage': 'http://www.canal2international.net/live.php',
+                       'channel': stream_url_extractor.LIVE,
                        'genre': 'Mixed'},
                       ]
           }
+
 
             # 'Replay': [{'name': 'Postal Truck',
             #           'thumb': 'http://www.vidsplay.com/vids/us_postal.jpg',
             #           'videopage': 'http://www.vidsplay.com/vids/us_postal.mp4',
             #           'genre': 'Cars'}
             #          ]}
-
 
 
 def build_url(**kwargs):
@@ -117,7 +117,7 @@ def add_category_list_item(category):
     # Hier komen categorie plaatjes uit het eerste item in de categorie.
     # Wellicht aparte plaatjes voor categorie als we meer categorien hebben.
     list_item.setArt({'thumb': VIDEOS[category][0]['thumb'],
-                      'icon': VIDEOS[category][0]['thumb'],
+                      'icon': VIDEOS[category][0]['icon'],
                       'fanart': VIDEOS[category][0]['thumb'],
                       'banner': VIDEOS[category][0]['thumb']})
     # Set additional info for the list item.
@@ -134,14 +134,6 @@ def add_category_list_item(category):
     # Add our item to the Kodi virtual folder listing.
     xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
 
-
-def get_video_stream_url(videopage_url):
-    xbmc.log("get_video_stream called with arguments: '" + videopage_url + "'")
-    main_page = urlopen(videopage_url)
-    parser = StreamUrlExtractor()
-    player_page_url = parser.parse_player_url(main_page)
-    player_page = urlopen(player_page_url)
-    return parser.parse_stream_url(player_page)
 
 def list_videos(category):
     """
@@ -169,14 +161,13 @@ def add_video_list_item(video):
     # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
     # Here we use the same image for all items for simplicity's sake.
     # In a real-life plugin you need to set each image accordingly.
-    list_item.setArt({'thumb': video['thumb'], 'icon': video['thumb'], 'fanart': video['thumb'], 'banner': video['thumb']})
+    list_item.setArt({'thumb': video['icon'], 'icon': video['icon'], 'fanart': video['thumb'], 'banner': video['thumb']})
     # Set 'IsPlayable' property to 'true'.
     # This is mandatory for playable items!
     list_item.setProperty('IsPlayable', 'true')
     # Create a URL for a plugin recursive call.
     # Example: plugin://plugin.video.canal2/?action=play&video=http://canal2-live-b2-cdn.hexaglobe.net/c9391...
-    video_url = get_video_stream_url(video['videopage'])
-    url = build_url(action='play', video=video_url)
+    url = build_url(action='play', channel=video['channel'])
     # Add the list item to a virtual Kodi folder.
     # is_folder = False means that this item won't open any sub-list.
     is_folder = False
@@ -184,15 +175,20 @@ def add_video_list_item(video):
     xbmcplugin.addDirectoryItem(_handle, url, list_item, is_folder)
 
 
-def play_video(path):
+def play_video(channel):
     """
-    Play a video by the provided path.
+    Play a video by the provided channel.
+    Channel is resolved to a url before play
+    Available channels in 
 
-    :param path: Fully-qualified video URL
+    :param channel: Canal2 channel: int
     :type path: str
     """
+    xbmc.log("play_video called with channel: " + str(channel), level=xbmc.LOGDEBUG)
+    url = stream_url_extractor.get_video_stream_url(channel)
+    xbmc.log("channel resolved to play url: " + url, level=xbmc.LOGDEBUG)
     # Create a playable item with a path to play.
-    play_item = xbmcgui.ListItem(path=path)
+    play_item = xbmcgui.ListItem(path=url)
     # Pass the item to the Kodi player.
     xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
     # TODO: aspect ratio voor livestream klopt niet. Kunnen we player view mode
@@ -218,8 +214,8 @@ def router(paramstring):
             # Display the list of videos in a provided category.
             list_videos(params['category'])
         elif params['action'] == 'play':
-            # Play a video from a provided URL.
-            play_video(params['video'])
+            # Play a video for provided channel. Url will be looked up before play
+            play_video(int(params['channel']))
         else:
             # If the provided paramstring does not contain a supported action
             # we raise an exception. This helps to catch coding errors,
